@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace DockerTest
 {
@@ -26,7 +30,7 @@ namespace DockerTest
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IHostApplicationLifetime applicationLifetime)
         {
             if (env.IsDevelopment())
             {
@@ -35,6 +39,15 @@ namespace DockerTest
             else
             {
                 app.UseExceptionHandler("/Error");
+            }
+
+            try
+            {
+                ExecStartupChecks();
+            } catch (Exception ex) 
+            {
+                logger.LogCritical(ex, "Startup-Checks failed.");
+                applicationLifetime.StopApplication();
             }
 
             app.UseStaticFiles();
@@ -47,6 +60,15 @@ namespace DockerTest
             {
                 endpoints.MapRazorPages();
             });
+        }
+
+        private void ExecStartupChecks()
+        {
+            // is volume for persistent data available?
+            if (!Directory.Exists("/shared"))
+            {
+                throw new Exception("Volume \"/shared\" is not available.");
+            }
         }
     }
 }

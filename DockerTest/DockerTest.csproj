@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileRunArguments>-v "C:\DockerVolume:/shared_"</DockerfileRunArguments>
   </PropertyGroup>
 
   <ItemGroup>
